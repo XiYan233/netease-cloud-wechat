@@ -10,7 +10,7 @@
 
 ------
 
-#### 本项目由[netease-cloud](https://github.com/ZainCheung/netease-cloud) 修改而来，感谢作者提供代码!
+#### 本项目由[netease-cloud](https://github.com/ZainCheung/netease-cloud) 修改而来，感谢作者提供代码！
 
 ### 使用文档: https://zaincheung.gitee.io/netease-cloud
 
