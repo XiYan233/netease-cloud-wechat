@@ -1,4 +1,4 @@
-# 网易云音乐升级全家桶
+# 网易云音乐升级全家桶 - 企业微信机器人推送版
 
 <p align="center">
     <a href="https://github.com/Demontisa"><img alt="Author" src="https://img.shields.io/badge/author-Demontisa-blueviolet"/></a>
