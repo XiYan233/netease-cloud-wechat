@@ -8,7 +8,7 @@
 '''
 from configparser import ConfigParser
 from threading import Timer
-import requests 
+import requests
 import random
 import hashlib
 import datetime
@@ -32,11 +32,11 @@ class Task(object):
     '''
     对象的构造函数
     '''
-    def __init__(self, uin, pwd, sckey, countrycode=86):
+    def __init__(self, uin, pwd, key, countrycode=86):
         self.uin = uin
         self.pwd = pwd
         self.countrycode = countrycode
-        self.sckey = sckey
+        self.key = key
 
     '''
     带上用户的cookie去发送数据
@@ -105,21 +105,31 @@ class Task(object):
         logging.info('获取用户详情成功')
 
     '''
-    Server推送
+    企业微信机器人推送
     '''
-    def server(self):
-        if self.sckey == '':
+    def wechat(self):
+        if self.key == '':
             return
-        url = 'https://sc.ftqq.com/' + self.sckey + '.send'
-        self.diyText() # 构造发送内容
-        response = requests.get(url,params={"text":self.title, "desp":self.content})
-        data = json.loads(response.text)
-        if data['errno'] == 0:
-            self.log('用户:' + self.name + '  Server酱推送成功')
-            logging.info('用户:' + self.name + '  Server酱推送成功')
+        self.diyText()
+        headers = {"Content-Type": "text/plain"}
+        data = {
+            "msgtype": "markdown",
+            "markdown": {
+                "content": '用户:<font color=\"warning\">' + self.name + '</font>' + self.title + self.content,
+                "mentioned_mobile_list":[self.uin],
+            }
+        }
+        r = requests.post(url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=' + self.key, headers=headers, json=data)
+        data = json.loads(r.text)
+        self.log(r.text)
+        logging.info(r.text)
+        if data['errmsg'] == 'ok':
+            self.log('用户:' + self.name + '  企业微信机器人推送成功')
+            logging.info('用户:' + self.name + '  企业微信机器人酱推送成功')
         else:
-            self.log('用户:' + self.name + '  Server酱推送失败,请检查sckey是否正确')
-            logging.info('用户:' + self.name + '  Server酱推送失败,请检查sckey是否正确')
+            self.log('用户:' + self.name + '  企业微信机器人推送失败,请检查key是否正确')
+            logging.info('用户:' + self.name + '  企业微信机器人推送失败,请检查key是否正确')
+
 
     '''
     自定义要推送到微信的内容
@@ -134,32 +144,31 @@ class Task(object):
             if self.level < 10:
                 if self.listenSongs < 20000:
                     if self.listenSongs < count:
-                        self.tip = '还需听歌' + str(count-self.listenSongs) + '首即可升级'
+                        self.tip = '<font color=\"warning\">' + '还需听歌' + str(count-self.listenSongs) + '首即可升级' + '</font>'
                         break
                 else:
-                    self.tip = '你已经听够20000首歌曲,如果登录天数达到800天即可满级'
+                    self.tip = '<font color=\"warning\">' + '你已经听够20000首歌曲,如果登录天数达到800天即可满级' + '</font>'
             else:
-                self.tip = '恭喜你已经满级!'
+                self.tip = '<font color=\"warning\">' + '恭喜你已经满级!' + '</font>'
         if self.error == '':
             state = ("- 目前已完成签到\n"
-                     "- 今日共打卡" + str(self.dakanum) + "次\n"
-                     "- 今日共播放" + str(self.dakaSongs) + "首歌\n"
-                     "- 还需要打卡" + str(self.day) +"天")
-            self.title = ("网易云今日打卡" + str(self.dakaSongs) + "首，已播放" + str(self.listenSongs) + "首")
+                     "- 今日共打卡" + '<font color=\"warning\">' + str(self.dakanum) + '</font>' + "次\n"
+                     "- 今日共播放" + '<font color=\"warning\">' + str(self.dakaSongs) + '</font>' + "首歌\n"
+                     "- 还需要打卡" + '<font color=\"warning\">' + str(self.day) + '</font>' + "天")
+            self.title = ("网易云今日打卡" + '<font color=\"warning\">' + str(self.dakaSongs) + '</font>' + "首，已播放" + '<font color=\"warning\">' + str(self.listenSongs) + '</font>' + "首")
         else:
             state = self.error
             self.title = '网易云听歌任务出现问题！'
         self.content = (
-            "------\n"
-            "#### 账户信息\n"
-            "- 用户名称：" + str(self.name) + "\n"
-            "- 当前等级：" + str(self.level) + "级\n"
-            "- 累计播放：" + str(self.listenSongs) + "首\n"
+            "\n#### 账户信息\n"
+            "- 用户名称：" + '<font color=\"warning\">' + str(self.name) + '</font>' + "\n"
+            "- 当前等级：" + '<font color=\"warning\">' + str(self.level) + "级" + '</font>\n'
+            "- 累计播放：" + '<font color=\"warning\">' + str(self.listenSongs) + "首" + '</font>\n'
             "- 升级提示：" + self.tip + "\n\n"
             "------\n"
             "#### 任务状态\n" + str(state) + "\n\n"
             "------\n"
-            "#### 注意事项\n- 网易云音乐等级数据每天下午2点更新 \n\n"
+            "#### 注意事项\n" + '<font color="#dd0000">' + "- 网易云音乐等级数据每天下午2点更新" + '</font>' + "\n\n"
             "------\n"
             "#### 打卡日志\n" + self.dakaSongs_list + "\n\n")
 
@@ -184,12 +193,12 @@ class Task(object):
             self.detail()
             counter  = self.listenSongs
             self.list.append("- 开始打卡\n\n")
-            for i in range(1,10):
+            for i in range(1,2):
                 self.daka()
                # self.log('用户:' + self.name + '  第' + str(i) + '次打卡成功,即将休眠30秒')
                 self.log('第' + str(i) + '次打卡成功')
                 logging.info('用户:' + self.name + '  第' + str(i) + '次打卡成功,即将休眠30秒')
-                time.sleep(10)
+                time.sleep(3)
                 self.dakanum =i
                 self.detail()
                 self.dakaSongs = self.listenSongs - counter
@@ -205,7 +214,7 @@ class Task(object):
             self.list.append("- 打卡结束\n\n")
             self.list.append("- 消息推送\n\n")
             self.dakaSongs_list = ''.join(self.list)
-            self.server()
+            self.wechat()
         except:
             self.log('用户任务执行中断,请检查账号密码是否正确')
             logging.error('用户任务执行中断,请检查账号密码是否正确========================================')
@@ -228,7 +237,7 @@ def init():
     api = config['setting']['api']
     md5Switch = config.getboolean('setting','md5Switch')
     peopleSwitch = config.getboolean('setting','peopleSwitch')
-    sckey = config['setting']['sckey']
+    key = config['setting']['key']
     print('配置文件读取完毕')
     logging.info('配置文件读取完毕')
     conf = {
@@ -238,7 +247,7 @@ def init():
             'api': api,
             'md5Switch': md5Switch, 
             'peopleSwitch':peopleSwitch,
-            'sckey':sckey
+            'key':key
         }
     return conf
 
@@ -288,7 +297,7 @@ def taskPool():
         for man in account:
             print('账号: ' + man['account'] + '  开始执行')
             logging.info('账号: ' + man['account'] + '  开始执行========================================')
-            task = Task(man['account'], man['password'], man['sckey'])
+            task = Task(man['account'], man['password'], man['key'])
             task.start()
             time.sleep(10)
         print('所有账号已全部完成任务,服务进入休眠中,等待明天重新启动')
@@ -300,7 +309,7 @@ def taskPool():
             print('MD5开关已打开,即将开始为你加密,密码不会上传至服务器,请知悉')
             logging.info('MD5开关已打开,即将开始为你加密,密码不会上传至服务器,请知悉')
             config['pwd'] = md5(config['pwd'])
-        task = Task(config['uin'], config['pwd'], config['sckey'], config['countrycode'])
+        task = Task(config['uin'], config['pwd'], config['key'], config['countrycode'])
         task.start()
 
 '''
