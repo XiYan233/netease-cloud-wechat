@@ -193,12 +193,12 @@ class Task(object):
             self.detail()
             counter  = self.listenSongs
             self.list.append("- 开始打卡\n\n")
-            for i in range(1,2):
+            for i in range(1,10):
                 self.daka()
                # self.log('用户:' + self.name + '  第' + str(i) + '次打卡成功,即将休眠30秒')
                 self.log('第' + str(i) + '次打卡成功')
                 logging.info('用户:' + self.name + '  第' + str(i) + '次打卡成功,即将休眠30秒')
-                time.sleep(3)
+                time.sleep(5)
                 self.dakanum =i
                 self.detail()
                 self.dakaSongs = self.listenSongs - counter
