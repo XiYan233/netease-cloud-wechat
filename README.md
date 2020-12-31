@@ -1,9 +1,8 @@
 # 网易云音乐升级全家桶
 
 <p align="center">
-    <a href="https://github.com/ZainCheung"><img alt="Author" src="https://img.shields.io/badge/author-ZainCheung-blueviolet"/></a>
+    <a href="https://github.com/Demontisa"><img alt="Author" src="https://img.shields.io/badge/author-Demontisa-blueviolet"/></a>
     <img alt="PHP" src="https://img.shields.io/badge/code-Python-success"/>
-    <img src="https://github-visitor-badge.glitch.me/badge?page_id=ZainCheung.netease-cloud"/>
 </p>
 通过调用官方接口，每天自动刷完300首歌，借此可以达到快速升级的目的。
 
@@ -21,7 +20,7 @@
 
 
 - [x]  每天自动升级
-- [x] 任务进度推送到微信
+- [x] 任务进度推送到企业微信
 - [x] 自定义网易云日推风格
 
 本项目实则由三个项目组成，分别是：
